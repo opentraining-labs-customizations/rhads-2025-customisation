@@ -1,0 +1,9 @@
+# Can be used to run the role locally via "ansible-playbook site.yml"
+---
+- hosts: localhost
+  connection: local
+  gather_facts: true
+  vars_files:
+    - defaults/main.yml
+  tasks:
+    - include_tasks: tasks/main.yml
