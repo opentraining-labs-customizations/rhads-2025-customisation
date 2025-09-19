@@ -304,3 +304,4 @@
     user: user1
     data:
       cluster_apps_domain: "{{ openshift_cluster_ingress_domain }}"
+      openshift_console_url: "{{ openshift_console_url }}"
