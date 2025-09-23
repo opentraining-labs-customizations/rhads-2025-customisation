@@ -298,10 +298,3 @@
         namespace: tssc-dh
       data:
         app-config.tssc.yaml: "{{ updated_app_config | to_nice_yaml }}"
-
-- name: Save user data
-  agnosticd_user_info:
-    user: user1
-    data:
-      cluster_apps_domain: "{{ openshift_cluster_ingress_domain }}"
-      openshift_console_url: "{{ openshift_console_url }}"
