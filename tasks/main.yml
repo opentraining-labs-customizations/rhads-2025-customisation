@@ -224,3 +224,83 @@
         namespace: tssc-dh
       data:
         app-config.tssc.yaml: "{{ updated_app_config | to_nice_yaml }}"
+
+- name: Get GitLab Route from gitlab namespace
+  kubernetes.core.k8s_info:
+    api_version: route.openshift.io/v1
+    kind: Route
+    name: gitlab
+    namespace: gitlab
+  register: gitlab_route_info
+
+- name: Set GitLab URL fact
+  set_fact:
+    gitlab_url: "https://{{ gitlab_route_info.resources[0].spec.host }}"
+
+- name: Get GitLab root API token from Secret in gitlab namespace
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: root-user-personal-token
+    namespace: gitlab
+  register: gitlab_token_secret
+
+- name: Set GitLab API token fact
+  set_fact:
+    gitlab_api_token: "{{ gitlab_token_secret.resources[0].data.token | b64decode }}"
+
+- name: Get development group ID from GitLab API
+  ansible.builtin.uri:
+    url: "{{ gitlab_url }}/api/v4/groups/development"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ gitlab_api_token }}"
+    status_code: [200]
+  register: development_group_info
+
+- name: Set development GitLab group ID fact
+  set_fact:
+    development_group_id: "{{ development_group_info.json.id }}"
+
+- name: Get existing orchestrator-approvals project from development group
+  ansible.builtin.uri:
+    url: "{{ gitlab_url }}/api/v4/groups/{{ development_group_id }}/projects"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ gitlab_api_token }}"
+    status_code: [200]
+  register: development_projects
+
+- name: Find orchestrator-approvals project in development group
+  set_fact:
+    r_existing_project: "{{ {'json': (development_projects.json | selectattr('name', 'equalto', 'orchestrator-approvals') | first)} }}"
+
+- name: Debug existing GitLab project info
+  debug:
+    var: r_existing_project
+
+- name: Create 'approved' label in GitLab project
+  ansible.builtin.uri:
+    url: "{{ gitlab_url }}/api/v4/projects/{{ r_existing_project.json.id }}/labels"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ gitlab_api_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      name: "approved"
+      color: "#00FF00"
+    status_code: [201, 409]  # 409 in case label already exists
+
+- name: Create 'denied' label in GitLab project
+  ansible.builtin.uri:
+    url: "{{ gitlab_url }}/api/v4/projects/{{ r_existing_project.json.id }}/labels"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ gitlab_api_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      name: "denied"
+      color: "#FF0000"
+    status_code: [201, 409]  # 409 in case label already exists
