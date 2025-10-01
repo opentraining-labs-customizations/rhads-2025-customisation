@@ -254,7 +254,7 @@
 
 - name: Get development group ID from GitLab API
   ansible.builtin.uri:
-    url: "{{ gitlab_url }}/api/v4/groups/development"
+    url: "{{ gitlab_url }}/api/v4/groups/rhdh"
     method: GET
     headers:
       Authorization: "Bearer {{ gitlab_api_token }}"
@@ -274,7 +274,7 @@
     status_code: [200]
   register: development_projects
 
-- name: Find orchestrator-approvals project in development group
+- name: Find orchestrator-approvals project in rhdh group
   set_fact:
     r_existing_project: "{{ {'json': (development_projects.json | selectattr('name', 'equalto', 'orchestrator-approvals') | first)} }}"
 
