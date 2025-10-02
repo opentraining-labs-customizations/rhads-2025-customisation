@@ -278,36 +278,36 @@
   debug:
     var: development_projects.json | map(attribute='name') | list
 
-#- name: Find orchestrator-approvals project in rhdh group
-#   set_fact:
-#     r_existing_project: "{{ {'json': (development_projects.json | selectattr('name', 'equalto', 'orchestrator-approvals') | first)} }}"
+- name: Find orchestrator-approvals project in rhdh group
+  set_fact:
+    r_existing_project: "{{ {'json': (development_projects.json | selectattr('name', 'equalto', 'orchestrator-approvals') | first)} }}"
 
-# - name: Debug existing GitLab project info
-#   debug:
-#     var: r_existing_project
+- name: Debug existing GitLab project info
+  debug:
+    var: r_existing_project
 
-# - name: Create 'approved' label in GitLab project
-#   ansible.builtin.uri:
-#     url: "{{ gitlab_url }}/api/v4/projects/{{ r_existing_project.json.id }}/labels"
-#     method: POST
-#     headers:
-#       Authorization: "Bearer {{ gitlab_api_token }}"
-#       Content-Type: "application/json"
-#     body_format: json
-#     body:
-#       name: "approved"
-#       color: "#00FF00"
-#     status_code: [201, 409]  # 409 in case label already exists
+- name: Create 'approved' label in GitLab project
+  ansible.builtin.uri:
+    url: "{{ gitlab_url }}/api/v4/projects/{{ r_existing_project.json.id }}/labels"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ gitlab_api_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      name: "approved"
+      color: "#00FF00"
+    status_code: [201, 409]  # 409 in case label already exists
 
-# - name: Create 'denied' label in GitLab project
-#   ansible.builtin.uri:
-#     url: "{{ gitlab_url }}/api/v4/projects/{{ r_existing_project.json.id }}/labels"
-#     method: POST
-#     headers:
-#       Authorization: "Bearer {{ gitlab_api_token }}"
-#       Content-Type: "application/json"
-#     body_format: json
-#     body:
-#       name: "denied"
-#       color: "#FF0000"
-#     status_code: [201, 409]  # 409 in case label already exists
+- name: Create 'denied' label in GitLab project
+  ansible.builtin.uri:
+    url: "{{ gitlab_url }}/api/v4/projects/{{ r_existing_project.json.id }}/labels"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ gitlab_api_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      name: "denied"
+      color: "#FF0000"
+    status_code: [201, 409]  # 409 in case label already exists
