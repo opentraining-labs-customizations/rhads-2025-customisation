@@ -402,3 +402,23 @@
           })
         }}
 
+- name: Patch NooBaa default BackingStore resource limits and requests
+  kubernetes.core.k8s:
+    api_version: noobaa.io/v1alpha1
+    kind: BackingStore
+    name: noobaa-default-backing-store
+    namespace: openshift-storage
+    merge_type: merge
+    definition:
+      spec:
+        pvPool:
+          resources:
+            limits:
+              cpu: "1000m"
+              memory: "4000Mi"
+            requests:
+              cpu: "500m"
+              memory: "500Mi"
+  tags:
+    - noobaa
+    - backingstore
