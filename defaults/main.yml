@@ -10,3 +10,7 @@ argo_namespace: tssc-gitops
 argo_username: admin
 cluster_context: admin
 kubeconfig_path: "{{ ansible_env.HOME }}/.kube/config"
+###########################################################
+rhdh_dynamic_template: "dynamic-plugins.yaml.j2"
+rhdh_namespace: "tssc-dh"
+rhdh_cm_name: "tssc-developer-hub-dynamic-plugins"
