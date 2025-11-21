@@ -505,3 +505,39 @@
           {{ dp_content | indent(0) }}
   tags:
     - test
+
+- name: Wait for RHDH deployment to be ready
+  vars:
+    rhdh_namespace: tssc-dh
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    name: backstage-developer-hub
+    namespace: "{{ rhdh_namespace }}"
+  until: rhdh_deploy_status_after.resources[0].status.availableReplicas == rhdh_deploy_status_after.resources[0].status.replicas
+  retries: 60
+  delay: 10
+  register: rhdh_deploy_status_after
+  tags:
+    - test
+
+- name: Restart Backstage deployment using oc
+  ansible.builtin.command: >
+    oc rollout restart deploy/backstage-developer-hub -n tssc-dh
+  tags:
+    - test
+
+- name: Wait for RHDH deployment to be ready
+  vars:
+    rhdh_namespace: tssc-dh
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    name: backstage-developer-hub
+    namespace: "{{ rhdh_namespace }}"
+  until: rhdh_deploy_status_after.resources[0].status.availableReplicas == rhdh_deploy_status_after.resources[0].status.replicas
+  retries: 60
+  delay: 10
+  register: rhdh_deploy_status_after
+  tags:
+    - test
