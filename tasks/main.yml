@@ -541,3 +541,42 @@
   register: rhdh_deploy_status_after
   tags:
     - test
+
+
+# Enable the image puller in DevSpaces
+- name: Get current DevSpaces CheCluster
+  kubernetes.core.k8s_info:
+    api_version: org.eclipse.che/v2
+    kind: CheCluster
+    name: devspaces
+    namespace: openshift-devspaces
+  register: current_checluster
+
+# Note the image added to the imagePuller is found in the devfiles in
+# https://github.com/opentraining-labs-customizations/tssc-developer-hub-configuration
+# We could make this more intelligent in the future by having it check
+# the imported repo in GitLab for the specific image in the devfiles there
+- name: Patch DevSpaces CheCluster to enable imagePuller
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: org.eclipse.che/v2
+      kind: CheCluster
+      metadata:
+        name: devspaces
+        namespace: openshift-devspaces
+      spec: >-
+        {{
+          current_checluster.resources[0].spec | combine({
+            'components': (current_checluster.resources[0].spec.components | default({})) | combine({
+              'imagePuller': {
+                'enable': true,
+                'spec': {
+                  'images': [
+                    'quay.io/devfile/universal-developer-image:ubi8-277c10c'
+                  ]
+                }
+              }
+            })
+          }, recursive=True)
+        }}
