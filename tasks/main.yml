@@ -572,9 +572,7 @@
               'imagePuller': {
                 'enable': true,
                 'spec': {
-                  'images': [
-                    'quay.io/devfile/universal-developer-image:ubi8-277c10c'
-                  ]
+                  'images': 'udi=quay.io/devfile/universal-developer-image:ubi9-9b60f86'
                 }
               }
             })
